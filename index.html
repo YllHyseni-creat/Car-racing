@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Racing Game Source Code</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="carracing.css">
+    <link rel="icon" href="Screenshot 2025-05-09 140453.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(120deg, #232526 0%, #414345 100%);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: #222;
+            border-radius: 12px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.14);
+            padding: 36px 24px;
+        }
+        h1 {
+            text-align: center;
+            color: #FFD700;
+            letter-spacing: 2px;
+        }
+        pre {
+            background: #121212;
+            padding: 18px;
+            border-radius: 8px;
+            color: #66FF99;
+            font-size: 1em;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Car Racing Game Source Code</h1>
+        <p>
+            Below you will find the car racing game source code. You can copy it and use it for your learning or projects.
+        </p>
+        <h2>HTML Example</h2>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Car Racing Game&lt;/title&gt;
+    &lt;link rel="stylesheet" href="car.css"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="game"&gt;
+        &lt;div class="score"&gt;Score: 0&lt;/div&gt;
+        &lt;div class="highScore"&gt;High Score: 0&lt;/div&gt;
+        &lt;div class="startScreen"&gt;Press Here or SPACE to Start&lt;/div&gt;
+        &lt;div class="playerCar"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;script src="game.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+    
+        <h2>Css</h2>
+        <pre>
+             body {
+    background: linear-gradient(120deg, #232526 0%, #414345 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.game {
+    position: relative;
+    width: 400px;
+    height: 600px;
+    margin: 40px auto;
+    background: #222;
+    overflow: hidden;
+    border-radius: 16px;
+    box-shadow: 0 6px 32px rgba(0,0,0,0.18);
+}
+
+.score, .highScore {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    color: #fff;
+    font-size: 1.2em;
+    z-index: 10;
+    text-shadow: 0 2px 8px #000;
+}
+
+.highScore {
+    top: 40px;
+    font-size: 1em;
+    color: #ffd700;
+}
+
+.startScreen {
+    width: 80%;
+    height: 120px;
+    line-height: 30px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    background-color: rgba(43, 205, 226, 0.95);
+    text-align: center;
+    border-radius: 10px;
+    border-bottom: 2px solid rgb(132, 197, 197);
+    font-size: 1.3em;
+    color: #222;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+
+.playerCar {
+    position: absolute;
+    width: 50px;
+    height: 80px;
+    bottom: 20px;
+    left: 175px;
+    background: url('car.png') no-repeat center/cover;
+    z-index: 5;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px #0008;
+}
+
+.roadLine {
+    position: absolute;
+    width: 8px;
+    height: 80px;
+    background: #fff;
+    left: 196px;
+    z-index: 1;
+    border-radius: 4px;
+    opacity: 0.7;
+}
+
+.enemyCar {
+    position: absolute;
+    width: 50px;
+    height: 80px;
+    background: url('opponent.png') no-repeat center/cover;
+    z-index: 6;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px #0006;
+}
+        </pre>
+
+        <h2>JavaScript</h2>
+        <pre>
+             const gameArea = document.querySelector('.game');
+const scoreElem = document.querySelector('.score');
+const highScoreElem = document.querySelector('.highScore');
+const startScreen = document.querySelector('.startScreen');
+const playerCar = document.querySelector('.playerCar');
+
+let player = { speed: 5, score: 0, inPlay: false, x: 0, y: 0 };
+let keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+let roadLines = [];
+let enemies = [];
+let highScore = localStorage.getItem('carHighScore') || 0;
+
+highScoreElem.textContent = "High Score: " + highScore;
+
+function startGame() {
+    startScreen.style.display = 'none';
+    gameArea.focus && gameArea.focus();
+    player.inPlay = true;
+    player.score = 0;
+    player.x = 175;
+    player.y = 500;
+    playerCar.style.left = player.x + 'px';
+    playerCar.style.top = player.y + 'px';
+
+    // Remove old lines and enemies
+    document.querySelectorAll('.roadLine, .enemyCar').forEach(e => e.remove());
+    roadLines = [];
+    enemies = [];
+
+    // Create road lines
+    for (let i = 0; i < 6; i++) {
+        let line = document.createElement('div');
+        line.className = 'roadLine';
+        line.style.top = (i * 100) + 'px';
+        gameArea.appendChild(line);
+        roadLines.push(line);
+    }
+
+    // Create enemy cars
+    for (let i = 0; i < 3; i++) {
+        let enemy = document.createElement('div');
+        enemy.className = 'enemyCar';
+        enemy.style.top = (Math.random() * -300) + 'px';
+        enemy.style.left = (Math.floor(Math.random() * 7) * 50) + 'px';
+        gameArea.appendChild(enemy);
+        enemies.push(enemy);
+    }
+
+    window.requestAnimationFrame(playGame);
+}
+
+function playGame() {
+    if (!player.inPlay) return;
+
+    moveLines();
+    moveEnemies();
+
+    // Player movement
+    if (keys.ArrowLeft && player.x > 0) player.x -= player.speed;
+    if (keys.ArrowRight && player.x < 350) player.x += player.speed;
+    if (keys.ArrowUp && player.y > 0) player.y -= player.speed;
+    if (keys.ArrowDown && player.y < 520) player.y += player.speed;
+
+    playerCar.style.left = player.x + 'px';
+    playerCar.style.top = player.y + 'px';
+
+    player.score++;
+    scoreElem.textContent = "Score: " + player.score;
+
+    // Update high score
+    if (player.score > highScore) {
+        highScore = player.score;
+        highScoreElem.textContent = "High Score: " + highScore;
+        localStorage.setItem('carHighScore', highScore);
+    }
+
+    window.requestAnimationFrame(playGame);
+}
+
+function moveLines() {
+    roadLines.forEach(line => {
+        let top = parseInt(line.style.top);
+        top += player.speed;
+        if (top > 600) top = -80;
+        line.style.top = top + 'px';
+    });
+}
+
+function moveEnemies() {
+    enemies.forEach(enemy => {
+        let top = parseInt(enemy.style.top);
+        top += player.speed + 2;
+        if (top > 600) {
+            top = Math.random() * -200;
+            enemy.style.left = (Math.floor(Math.random() * 7) * 50) + 'px';
+        }
+        enemy.style.top = top + 'px';
+
+        // Collision detection
+        if (isCollide(playerCar, enemy)) {
+            endGame();
+        }
+    });
+}
+
+function isCollide(a, b) {
+    let aRect = a.getBoundingClientRect();
+    let bRect = b.getBoundingClientRect();
+    return !(
+        aRect.bottom < bRect.top ||
+        aRect.top > bRect.bottom ||
+        aRect.right < bRect.left ||
+        aRect.left > bRect.right
+    );
+}
+
+function endGame() {
+    player.inPlay = false;
+    startScreen.style.display = 'block';
+    startScreen.textContent = "Game Over! Your Score: " + player.score + " | Click or Press SPACE to Restart";
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key in keys) {
+        keys[e.key] = true;
+    }
+    if (!player.inPlay && (e.key === " " || e.key === "Spacebar")) {
+        startGame();
+    }
+});
+document.addEventListener('keyup', e => {
+    if (e.key in keys) {
+        keys[e.key] = false;
+    }
+});
+
+startScreen.addEventListener('click', startGame);
+
+window.onload = () => {
+    startScreen.style.display = 'block';
+    scoreElem.textContent = "Score: 0";
+    highScoreElem.textContent = "High Score: " + highScore;
+};
+        </pre>
+        <p>
+            If you want to see a live example, simply copy the code above and open it with your browser.
+        </p>
+         
+        <h2>Images</h2>
+        <p>
+            car.png – The player's car image (50x80px, PNG, with transparent background).<br>
+            <br>
+           opponent.png – The opponent car image (50x80px, PNG, with transparent background).<br>
+           <br>
+           bg.jpg – The road background image (can be a simple photo or a gradient).
+
+You can use these images in your project for a better visual experience.
+        </p>
+    </div>
+</body>
+</html>
